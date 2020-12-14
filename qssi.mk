@@ -24,9 +24,26 @@ TARGET_SKIP_OTA_PACKAGE := true
 # Enable AVB 2.0
 BOARD_AVB_ENABLE := true
 
-#### Dynamic Partition Handling
+# Inherit Gapps.
+GAPPS_VARIANT := nano
+$(call inherit-product, vendor/opengapps/build/opengapps-packages.mk)
+GAPPS_PRODUCT_PACKAGES += \
+		Chrome \
+		PrebuiltBugle \
+		CalculatorGoogle \
+		GoogleContacts \
+		LatinImeGoogle \
+		PrebuiltDeskClockGoogle \
+		WebViewGoogle \
+		CalendarGooglePrebuilt \
+		GoogleDialer
 
-####
+GAPPS_EXCLUDED_PACKAGES := Velvet
+GAPPS_FORCE_PACKAGE_OVERRIDES := true
+GAPPS_FORCE_WEBVIEW_OVERRIDES := true
+GAPPS_FORCE_MMS_OVERRIDES := true
+GAPPS_FORCE_DIALER_OVERRIDES := true
+GAPPS_PACKAGE_OVERRIDES := LatinImeGoogle
 
 # Retain the earlier default behavior i.e. ota config (dynamic partition was disabled if not set explicitly), so set
 # SHIPPING_API_LEVEL to 28 if it was not set earlier (this is generally set earlier via build.sh per-target)
