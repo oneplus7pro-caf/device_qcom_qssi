@@ -30,43 +30,21 @@ BOARD_AVB_ENABLE := true
 
 # Retain the earlier default behavior i.e. ota config (dynamic partition was disabled if not set explicitly), so set
 # SHIPPING_API_LEVEL to 28 if it was not set earlier (this is generally set earlier via build.sh per-target)
-SHIPPING_API_LEVEL := 30
+SHIPPING_API_LEVEL := 28
 
 $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/cne_url*.mk)
 
-#### Turning BOARD_DYNAMIC_PARTITION_ENABLE flag to TRUE will enable dynamic partition/super image creation.
-# Enable Dynamic partitions only for Q new launch devices and beyond.
-ifeq (true,$(call math_gt_or_eq,$(SHIPPING_API_LEVEL),29))
-  BOARD_DYNAMIC_PARTITION_ENABLE ?= true
-  PRODUCT_SHIPPING_API_LEVEL := $(SHIPPING_API_LEVEL)
-else ifeq ($(SHIPPING_API_LEVEL),28)
-  BOARD_DYNAMIC_PARTITION_ENABLE ?= false
-  $(call inherit-product, build/make/target/product/product_launched_with_p.mk)
-endif
+BOARD_DYNAMIC_PARTITION_ENABLE := false
+$(call inherit-product, build/make/target/product/product_launched_with_p.mk)
 
-ifneq ($(strip $(BOARD_DYNAMIC_PARTITION_ENABLE)),true)
 # Enable chain partition for system, to facilitate system-only OTA in Treble.
 BOARD_AVB_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
 BOARD_AVB_SYSTEM_ALGORITHM := SHA256_RSA2048
 BOARD_AVB_SYSTEM_ROLLBACK_INDEX := 0
 BOARD_AVB_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --set_hashtree_disabled_flag --flags 2
 PRODUCT_BUILD_RAMDISK_IMAGE := false
 PRODUCT_BUILD_PRODUCT_IMAGE := false
-else
-PRODUCT_USE_DYNAMIC_PARTITIONS := true
-# Disable building the SUPER partition in this build. SUPER should be built
-# after QSSI has been merged with the SoC build.
-PRODUCT_BUILD_SYSTEM_EXT_IMAGE := true
-PRODUCT_BUILD_PRODUCT_IMAGE := true
-PRODUCT_BUILD_SUPER_PARTITION := false
-PRODUCT_BUILD_RAMDISK_IMAGE := true
-BOARD_AVB_VBMETA_SYSTEM := system system_ext product
-BOARD_AVB_VBMETA_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
-BOARD_AVB_VBMETA_SYSTEM_ALGORITHM := SHA256_RSA2048
-BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
-BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
-endif
-#### Dynamic Partition Handling
 
 PRODUCT_SOONG_NAMESPACES += \
     hardware/google/av \
@@ -256,10 +234,6 @@ ifeq ($(TARGET_USES_NEW_ION),true)
 AUDIO_FEATURE_ENABLED_DLKM := true
 else
 AUDIO_FEATURE_ENABLED_DLKM := false
-endif
-
-ifeq ($(ENABLE_VIRTUAL_AB), true)
-    $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 endif
 
 # Include mainline components and QSSI whitelist

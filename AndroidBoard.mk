@@ -79,6 +79,6 @@ include vendor/qcom/opensource/core-utils/build/AndroidBoardCommon.mk
 $(shell  mkdir -p $(TARGET_OUT_VENDOR)/firmware)
 
 # override default make with prebuilt make path (if any)
-ifneq (, $(wildcard $(shell pwd)/prebuilts/build-tools/linux-x86/bin/make))
-   MAKE := $(shell pwd)/prebuilts/build-tools/linux-x86/bin/$(MAKE)
+ifneq (, $(wildcard $(SOURCE_ROOT)/prebuilts/build-tools/linux-x86/bin/make))
+   MAKE := $(SOURCE_ROOT)/prebuilts/build-tools/linux-x86/bin/$(MAKE)
 endif

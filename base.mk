@@ -758,33 +758,20 @@ WLAN += qca_cld_wlan.ko
 FD_LEAK := libc_leak_detector
 
 PRODUCT_PACKAGES := \
-    AccountAndSyncSettings \
-    DeskClock \
     AlarmProvider \
-    Calculator \
-    Calendar \
-    Camera \
     CertInstaller \
     DrmProvider \
-    Email \
-    Gallery2 \
-    LatinIME \
-    Music \
     netutils-wrapper-1.0 \
     Provision \
     Protips \
-    QuickSearchBox \
     Settings \
     Sync \
     SystemUI \
     Updater \
-    CalendarProvider \
-    SyncProvider \
     SoundRecorder \
     IM \
     SnapdragonGallery \
-    VideoEditor \
-    SnapdragonLauncher
+    VideoEditor
 
 ifeq ($(TARGET_HAS_LOW_RAM),true)
     DELAUN := Launcher3Go
@@ -794,8 +781,6 @@ else
             LiveWallpapers \
             LiveWallpapersPicker \
             VisualizationWallpapers
-
-    DELAUN := Launcher3
 endif
 
 PRODUCT_PACKAGES += $(ALSA_HARDWARE)
