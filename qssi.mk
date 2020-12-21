@@ -24,6 +24,9 @@ TARGET_SKIP_OTA_PACKAGE := true
 # Enable AVB 2.0
 BOARD_AVB_ENABLE := true
 
+# Inherit proprietary blobs
+$(call inherit-product, vendor/oneplus/guacamole/system/guacamole-system.mk)
+
 # Inherit Gapps.
 GAPPS_VARIANT := nano
 $(call inherit-product, vendor/opengapps/build/opengapps-packages.mk)
