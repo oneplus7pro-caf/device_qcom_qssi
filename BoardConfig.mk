@@ -23,7 +23,7 @@ TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a76
 
 BOARD_SECCOMP_POLICY := $(DEV_PATH)/seccomp
-
+BOARD_ROOT_EXTRA_FOLDERS := op1 op2
 BOARD_SYSTEMSDK_VERSIONS:= $(SHIPPING_API_LEVEL)
 
 TARGET_NO_BOOTLOADER := true
@@ -126,8 +126,8 @@ BOARD_VENDORIMAGE_PARTITION_SIZE := 1073741824
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 3640655872
 AB_OTA_PARTITIONS ?= system
 
-###### Dynamic Partition Handling ####
-
+# Sepolicy
+BOARD_SEPOLICY_DIRS += device/qcom/qssi/sepolicy
 #################################################################################
 # This is the End of BoardConfig.mk file.
 # Now, Pickup other split Board.mk files:
