@@ -5,7 +5,10 @@
 DEV_PATH := device/oneplus/guacamole
 #ALLOW_MISSING_DEPENDENCIES := true
 
+BOARD_VENDOR := oneplus
+
 TARGET_BOARD_PLATFORM := msmnile
+TARGET_BOARD_PLATFORM_GPU := qcom-adreno640
 TARGET_BOOTLOADER_BOARD_NAME := msmnile
 
 TARGET_ARCH := arm64
@@ -22,6 +25,17 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a76
 
+TARGET_USES_64_BIT_BINDER := true
+
+#Keymaster
+TARGET_PROVIDES_KEYMASTER := true
+
+# ANT+
+BOARD_ANT_WIRELESS_DEVICE := "qualcomm-hidl"
+
+# APEX
+DEXPREOPT_GENERATE_APEX_IMAGE := true
+
 BOARD_SECCOMP_POLICY := $(DEV_PATH)/seccomp
 BOARD_ROOT_EXTRA_FOLDERS := op1 op2
 BOARD_SYSTEMSDK_VERSIONS:= $(SHIPPING_API_LEVEL)
@@ -33,10 +47,8 @@ TARGET_NO_KERNEL := true
 # Disable DLKMs compilation for lunch qssi builds.
 TARGET_KERNEL_DLKM_DISABLE := true
 
--include $(DEV_PATH)/BoardConfigVendor.mk
-
 USE_OPENGL_RENDERER := true
-BOARD_USE_LEGACY_UI := true
+BOARD_USE_LEGACY_UI := false
 
 # Defines for enabling A/B builds
 AB_OTA_UPDATER := true
@@ -128,10 +140,4 @@ AB_OTA_PARTITIONS ?= system
 
 # Sepolicy
 BOARD_SEPOLICY_DIRS += device/qcom/qssi/sepolicy
-#################################################################################
-# This is the End of BoardConfig.mk file.
-# Now, Pickup other split Board.mk files:
-#################################################################################
--include vendor/qcom/defs/board-defs/system/*.mk
-#################################################################################
 include device/qcom/sepolicy/SEPolicy.mk
