@@ -1,6 +1,9 @@
 #For QSSI, we build only the system image. Here we explicitly set the images
 #we build so there is no confusion.
 
+# Enable updating of APEXes
+$(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
+
 #Enable product partition Native I/F. It is automatically set to current if
 #the shipping API level for the target is greater than 29
 PRODUCT_PRODUCT_VNDK_VERSION := current
@@ -21,8 +24,13 @@ PRODUCT_BUILD_USERDATA_IMAGE := false
 #when we combine this system build with the non-system images.
 TARGET_SKIP_OTA_PACKAGE := true
 
-# Enable AVB 2.0
+# Enable AVB
 BOARD_AVB_ENABLE := true
+BOARD_AVB_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
+BOARD_AVB_SYSTEM_ALGORITHM := SHA256_RSA2048
+BOARD_AVB_SYSTEM_ROLLBACK_INDEX := 0
+BOARD_AVB_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --set_hashtree_disabled_flag --flags 2
 
 # Inherit proprietary blobs
 $(call inherit-product, vendor/oneplus/guacamole/system/guacamole-system.mk)
@@ -31,15 +39,15 @@ $(call inherit-product, vendor/oneplus/guacamole/system/guacamole-system.mk)
 GAPPS_VARIANT := nano
 $(call inherit-product, vendor/opengapps/build/opengapps-packages.mk)
 GAPPS_PRODUCT_PACKAGES += \
-		Chrome \
-		PrebuiltBugle \
-		CalculatorGoogle \
-		GoogleContacts \
-		LatinImeGoogle \
-		PrebuiltDeskClockGoogle \
-		WebViewGoogle \
-		CalendarGooglePrebuilt \
-		GoogleDialer
+    	Chrome \
+	PrebuiltBugle \
+	CalculatorGoogle \
+	GoogleContacts \
+	LatinImeGoogle \
+	PrebuiltDeskClockGoogle \
+	WebViewGoogle \
+	CalendarGooglePrebuilt \
+	GoogleDialer
 
 GAPPS_EXCLUDED_PACKAGES := Velvet
 GAPPS_FORCE_PACKAGE_OVERRIDES := true
@@ -57,12 +65,6 @@ $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/cne_url*.
 BOARD_DYNAMIC_PARTITION_ENABLE := false
 $(call inherit-product, build/make/target/product/product_launched_with_p.mk)
 
-# Enable chain partition for system, to facilitate system-only OTA in Treble.
-BOARD_AVB_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
-BOARD_AVB_SYSTEM_ALGORITHM := SHA256_RSA2048
-BOARD_AVB_SYSTEM_ROLLBACK_INDEX := 0
-BOARD_AVB_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
-BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --set_hashtree_disabled_flag --flags 2
 PRODUCT_BUILD_RAMDISK_IMAGE := false
 PRODUCT_BUILD_PRODUCT_IMAGE := false
 
@@ -81,6 +83,15 @@ TARGET_USES_NEW_ION := true
 
 ENABLE_AB ?= true
 
+AB_OTA_POSTINSTALL_CONFIG += \
+    RUN_POSTINSTALL_system=true \
+    POSTINSTALL_PATH_system=system/bin/otapreopt_script \
+    FILESYSTEM_TYPE_system=ext4 \
+    POSTINSTALL_OPTIONAL_system=true
+
+PRODUCT_PACKAGES += \
+    otapreopt_script
+
 TARGET_DEFINES_DALVIK_HEAP := true
 $(call inherit-product, device/qcom/qssi/common64.mk)
 
@@ -91,7 +102,6 @@ PRODUCT_PROPERTY_OVERRIDES  += \
 	dalvik.vm.heaptargetutilization=0.75 \
 	dalvik.vm.heapminfree=512k \
 	dalvik.vm.heapmaxfree=8m
-
 
 PRODUCT_NAME := $(VENDOR_QTI_DEVICE)
 PRODUCT_DEVICE := $(VENDOR_QTI_DEVICE)
@@ -106,8 +116,7 @@ TARGET_USES_QCOM_BSP := false
 # RRO configuration
 TARGET_USES_RRO := true
 
-TARGET_USES_NQ_NFC := true
-
+TARGET_USES_NQ_NFC := false
 
 # default is nosdcard, S/W button enabled in resource
 PRODUCT_CHARACTERISTICS := nosdcard
@@ -151,7 +160,6 @@ ifeq ($(ENABLE_AB), true)
 PRODUCT_PACKAGES += update_engine \
     update_engine_client \
     update_verifier \
-    bootctrl.msmnile \
     android.hardware.boot@1.0-impl \
     android.hardware.boot@1.0-service
 
@@ -184,9 +192,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += camera.device@3.2-impl
 PRODUCT_PACKAGES += camera.device@1.0-impl
 PRODUCT_PACKAGES += android.hardware.camera.provider@2.4-impl
+
 # Enable binderized camera HAL
 PRODUCT_PACKAGES += android.hardware.camera.provider@2.4-service_64
-
 
 # Context hub HAL
 PRODUCT_PACKAGES += \
@@ -196,7 +204,6 @@ PRODUCT_PACKAGES += \
 # system prop for enabling QFS (QTI Fingerprint Solution)
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.vendor.qfp=true
-
 
 # USB default HAL
 PRODUCT_PACKAGES += \
@@ -224,6 +231,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/qcom/qssi/public.libraries.system_ext-qti.txt:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/public.libraries-qti.txt
 
+# bootanimation
+PRODUCT_COPY_FILES += \
+    device/qcom/qssi/bootanimation/bootanimation.zip:$(TARGET_COPY_OUT_PRODUCT)/media/bootanimation.zip
+
 #Enable full treble flag
 PRODUCT_FULL_TREBLE_OVERRIDE := true
 PRODUCT_VENDOR_MOVE_ENABLED := true
@@ -233,20 +244,14 @@ ifneq ($(strip $(TARGET_USES_RRO)),true)
 DEVICE_PACKAGE_OVERLAYS += device/qcom/qssi/overlay
 endif
 
-
 #Enable vndk-sp Libraries
 PRODUCT_PACKAGES += vndk_package
 
 PRODUCT_COMPATIBLE_PROPERTY_OVERRIDE:=true
 
-
 TARGET_MOUNT_POINTS_SYMLINKS := false
 
 TARGET_USES_MKE2FS := true
-
-PRODUCT_PROPERTY_OVERRIDES += \
-ro.crypto.volume.filenames_mode = "aes-256-cts" \
-ro.crypto.allow_encrypt_override = true
 
 TARGET_USES_QCOM_DISPLAY_BSP := true
 
@@ -265,7 +270,8 @@ endif
 
 ###################################################################################
 # This is the End of target.mk file.
-# Now, Pickup other split product.mk files:
+# Now, Pickup other split makefiles:
 ###################################################################################
 $(call inherit-product-if-exists, vendor/qcom/defs/product-defs/system/*.mk)
+$(call inherit-product-if-exists, vendor/qcom/defs/board-defs/system/*.mk)
 ###################################################################################
